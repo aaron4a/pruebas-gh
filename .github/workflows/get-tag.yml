@@ -22,3 +22,6 @@ jobs:
           run: |
             original_string=${{ steps.get_tag.outputs.tag }}
             echo "version=${original_string#v}" >> $GITHUB_OUTPUT
+        - name: Show version
+          run: |
+            echo ${{ steps.strip_v.outputs.version }}
