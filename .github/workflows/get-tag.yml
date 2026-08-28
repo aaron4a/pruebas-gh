@@ -17,3 +17,8 @@ jobs:
         - name: Show tag
           run: |
             echo ${{ steps.get_tag.outputs.tag }}  
+        - name: Remove 'v' prefix and set as output
+          id: strip_v
+          run: |
+            original_string=${{ steps.get_tag.outputs.tag }}
+            echo "version=${original_string#v}" >> $GITHUB_OUTPUT
