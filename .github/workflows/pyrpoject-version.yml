@@ -16,20 +16,45 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Get strategy version from pyproject.toml
-        id: get_tag
+      - name: Get strategy name and version from pyproject.toml
+        id: get_meta
         run: |
+          NAME=$(python3 -c "
+          import sys
+          tomllib = __import__('tomllib') if sys.version_info >= (3, 11) else __import__('tomli')
+          with open('pyproject.toml', 'rb') as f:
+              print(tomllib.load(f)['tool']['axion-strategy']['name'])
+          ")
           VERSION=$(python3 -c "
           import sys
           tomllib = __import__('tomllib') if sys.version_info >= (3, 11) else __import__('tomli')
           with open('pyproject.toml', 'rb') as f:
               print(tomllib.load(f)['tool']['axion-strategy']['version'])
           ")
+          echo "name=$NAME" >> "$GITHUB_OUTPUT"
           echo "tag=$VERSION" >> "$GITHUB_OUTPUT"
+
+      - name: Add custom title to changelog
+        run: |
+          echo "## ${{ steps.get_meta.outputs.name }} ${{ steps.get_meta.outputs.tag }} - $(date +%Y-%m-%d)" > /tmp/new_entry.md
+          echo "" >> /tmp/new_entry.md
+          cat CHANGELOG.md >> /tmp/new_entry.md 2>/dev/null || true
+          mv /tmp/new_entry.md CHANGELOG.md    
 
       - name: Generate release notes for this tag
         uses: orhun/git-cliff-action@v4
         id: git-cliff
         with:
           config: cliff.toml
-          args: --latest --strip header --tag ${{ steps.get_tag.outputs.tag }} --prepend CHANGELOG.md
+          args: --latest --strip all --tag ${{ steps.get_meta.outputs.tag }} --prepend CHANGELOG.md
+
+      - name: Open PR with the updated file
+        uses: peter-evans/create-pull-request@v7
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: "docs: regenerate CHANGELOG.md"
+          title: "docs: regenerate complete"
+          body: Auto-generated full changelog rebuild.
+          branch: changelog-regenerate
+          add-paths: CHANGELOG.md
+          base: main
