@@ -59,7 +59,7 @@ testpaths = ["tests"]
 [tool.axion-strategy]
 name = "hola-project"
 service = "adaptiveSvTangency"
-version = "0.2.0"
+version = "0.1.0"
 entrypoint = "adaptive_sv_tangency.strategy:AdaptiveSvTangencyStrategy"
 # Copy the whole package into the image build context.
 source_packages = ["src/adaptive_sv_tangency"]
