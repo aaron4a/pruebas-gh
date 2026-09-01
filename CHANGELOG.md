@@ -1,3 +1,17 @@
+## adaptive-sv-tangency 0.2.1 (1.5.7) - 2026-09-01
+
+
+[c250c8e](https://github.com/aaron4a/pruebas-gh/commit/c250c8ea0d47197ece4920bad6059200adceefe9)...[a9d0733](https://github.com/aaron4a/pruebas-gh/commit/a9d07330c5a78f8ae516beae813047f08cad05d6)
+
+### Features
+
+- Change hola text ([95f6f5c](https://github.com/aaron4a/pruebas-gh/commit/95f6f5cdb42e76c5b73d6b0de3f647f1a644f777))
+
+### Miscellaneous Tasks
+
+- Change pyproject ([a9d0733](https://github.com/aaron4a/pruebas-gh/commit/a9d07330c5a78f8ae516beae813047f08cad05d6))
+
+
 ## adaptive-sv-tangency 0.1.1 (1.5.6) - 2026-09-01
 
 
