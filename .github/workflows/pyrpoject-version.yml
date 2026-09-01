@@ -37,6 +37,7 @@ jobs:
         with:
           base: ${{ steps.prev_tag.outputs.ref }}
           ref: ${{ github.ref }}
+          predicate-quantifier: every
           filters: |
             chau:
               - 'chau/**'
