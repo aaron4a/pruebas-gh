@@ -8,28 +8,74 @@ on:
 permissions:
   contents: write
   pull-requests: write
+
 jobs:
-  release:
+  detect-changes:
     runs-on: ubuntu-latest
+    outputs:
+      chau: ${{ steps.detect.outputs.chau }}
+      hola: ${{ steps.detect.outputs.hola }}
     steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Get previous tag
+        id: prev_tag
+        run: |
+          git fetch --tags --force
+          PREV_TAG=$(git tag --sort=-v:refname | grep -v "^${GITHUB_REF_NAME}$" | head -n1 || true)
+          if [ -z "$PREV_TAG" ]; then
+            REF=$(git rev-list --max-parents=0 HEAD)
+          else
+            REF="$PREV_TAG"
+          fi
+          echo "ref=$REF" >> "$GITHUB_OUTPUT"
+
+      - name: Detect changed strategy packages
+        uses: dorny/paths-filter@v4
+        id: detect
+        with:
+          base: ${{ steps.prev_tag.outputs.ref }}
+          ref: ${{ github.ref }}
+          filters: |
+            chau:
+              - 'chau/**'
+            hola:
+              - 'hola/**'
+
+  release:
+    needs: detect-changes
+    if: needs.detect-changes.outputs.chau == 'true' || needs.detect-changes.outputs.hola == 'true'
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        folder: [chau, hola]
+    steps:
+      - name: Skip folder with no changes
+        if: needs.detect-changes.outputs[matrix.folder] != 'true'
+        run: echo "No changes in ${{ matrix.folder }}, skipping." >> "$GITHUB_STEP_SUMMARY"
 
       - uses: actions/checkout@v6
+        if: needs.detect-changes.outputs[matrix.folder] == 'true'
         with:
           fetch-depth: 0
 
       - name: Get strategy name and version from pyproject.toml
         id: get_meta
+        if: needs.detect-changes.outputs[matrix.folder] == 'true'
         run: |
           NAME=$(python3 -c "
           import sys
           tomllib = __import__('tomllib') if sys.version_info >= (3, 11) else __import__('tomli')
-          with open('pyproject.toml', 'rb') as f:
+          with open('${{ matrix.folder }}/pyproject.toml', 'rb') as f:
               print(tomllib.load(f)['tool']['axion-strategy']['name'])
           ")
           VERSION=$(python3 -c "
           import sys
           tomllib = __import__('tomllib') if sys.version_info >= (3, 11) else __import__('tomli')
-          with open('pyproject.toml', 'rb') as f:
+          with open('${{ matrix.folder }}/pyproject.toml', 'rb') as f:
               print(tomllib.load(f)['tool']['axion-strategy']['version'])
           ")
           GIT_TAG="${GITHUB_REF_NAME#v}"
@@ -40,23 +86,29 @@ jobs:
       - name: Generate release notes for this tag
         uses: orhun/git-cliff-action@v4
         id: git-cliff
+        if: needs.detect-changes.outputs[matrix.folder] == 'true'
         with:
           config: cliff.toml
-          args: --latest --strip all --tag ${{ steps.get_meta.outputs.version }} --prepend CHANGELOG.md
+          args: >-
+            --latest --strip all --tag ${{ steps.get_meta.outputs.version }}
+            --include-path "${{ matrix.folder }}/**"
+            --prepend ${{ matrix.folder }}/CHANGELOG.md
 
       - name: Insert custom title above the generated section
+        if: needs.detect-changes.outputs[matrix.folder] == 'true'
         run: |
           TITLE="## ${{ steps.get_meta.outputs.name }} ${{ steps.get_meta.outputs.version }} (${{ steps.get_meta.outputs.git_tag }}) - $(date +%Y-%m-%d)"
-          { echo "$TITLE"; echo ""; cat CHANGELOG.md 2>/dev/null || true; } > /tmp/tmp_changelog.md
-          mv /tmp/tmp_changelog.md CHANGELOG.md
+          { echo "$TITLE"; echo ""; cat ${{ matrix.folder }}/CHANGELOG.md 2>/dev/null || true; } > /tmp/tmp_changelog_${{ matrix.folder }}.md
+          mv /tmp/tmp_changelog_${{ matrix.folder }}.md ${{ matrix.folder }}/CHANGELOG.md
 
       - name: Open PR with the updated file
+        if: needs.detect-changes.outputs[matrix.folder] == 'true'
         uses: peter-evans/create-pull-request@v7
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          commit-message: "docs: regenerate CHANGELOG.md"
-          title: "docs: regenerate complete"
-          body: Auto-generated full changelog rebuild.
-          branch: changelog-regenerate
-          add-paths: CHANGELOG.md
+          commit-message: "docs: regenerate ${{ matrix.folder }}/CHANGELOG.md"
+          title: "docs: regenerate ${{ matrix.folder }} changelog"
+          body: Auto-generated changelog update for ${{ matrix.folder }}.
+          branch: changelog-regenerate-${{ matrix.folder }}
+          add-paths: ${{ matrix.folder }}/CHANGELOG.md
           base: main
