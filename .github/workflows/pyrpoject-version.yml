@@ -1,4 +1,4 @@
-name: Create GitHub Release
+name: Version pyproject
 
 on:
   push:
@@ -7,17 +7,12 @@ on:
 
 permissions:
   contents: write
-
 jobs:
   release:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
-        with:
-          fetch-depth: 0
-
       - name: Get strategy version from pyproject.toml
-        id: get_version
+        id: get_tag
         run: |
           VERSION=$(python3 -c "
           import sys
@@ -25,11 +20,11 @@ jobs:
           with open('pyproject.toml', 'rb') as f:
               print(tomllib.load(f)['tool']['axion-strategy']['version'])
           ")
-          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "tag=$VERSION" >> "$GITHUB_OUTPUT"
 
       - name: Generate release notes for this tag
         uses: orhun/git-cliff-action@v4
         id: git-cliff
         with:
           config: cliff.toml
-          args: --latest --strip header --tag ${{ steps.get_version.outputs.version }} --prepend CHANGES.md
+          args: --latest --strip header --tag ${{ steps.get_tag.outputs.tag }} --prepend CHANGES.md

@@ -1,0 +1,77 @@
+[build-system]
+requires = ["setuptools>=77.0.3", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "adaptive_sv_tangency"
+version = "0.1.0"
+description = "Adaptive stochastic-volatility tangency portfolio strategy for Axion FSM"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "pydantic>=2.5.0",
+    "numpy>=1.26.0",
+    "pandas>=2.0.0",
+    "axion-common @ git+https://github.com/ferfedec/axion-common.git#subdirectory=axion-python",
+    "axion-series @ git+https://github.com/ferfedec/axion-series.git#subdirectory=axion-series-python",
+    "axion-ticker @ git+https://github.com/ferfedec/axion-ticker.git#subdirectory=axion-ticker-python",
+    "axion-run @ git+https://github.com/ferfedec/axion-run.git#subdirectory=axion-run-python"
+]
+
+[project.optional-dependencies]
+# Heavy quant stack — needed to run the strategy end-to-end, not for the light
+# unit-tests. `dev` pulls it in so `pytest` and a local `axion-strategy dev` work.
+quant = [
+    "scipy>=1.11.0",
+    "statsmodels>=0.14.0",
+    "pykalman>=0.9.7",
+    "riskfolio-lib>=6.0.0",
+]
+
+data = [
+    "numpy>=1.26.0",
+    "pandas>=2.0.0",
+    "axion-series @ git+https://github.com/ferfedec/axion-series.git#subdirectory=axion-series-python",
+    "axion-ticker @ git+https://github.com/ferfedec/axion-ticker.git#subdirectory=axion-ticker-python",
+    "axion-run @ git+https://github.com/ferfedec/axion-run.git#subdirectory=axion-run-python"
+]
+
+dev = [
+    "pytest>=8.0.0",
+    "pydantic>=2.5.0"
+]
+
+all = [
+    "adaptive_sv_tangency[quant,data,dev]"
+]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+include = ["adaptive_sv_tangency*"]
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+testpaths = ["tests"]
+
+# --- Axion deployment manifest (the single source of truth) ----------------
+# `axion-strategy deploy` (run from this folder) reads this block. Everything
+# the deployer needs lives here; no flags required.
+[tool.axion-strategy]
+name = "adaptive-sv-tangency"
+service = "adaptiveSvTangency"
+version = "0.1.0"
+entrypoint = "adaptive_sv_tangency.strategy:AdaptiveSvTangencyStrategy"
+# Copy the whole package into the image build context.
+source_packages = ["src/adaptive_sv_tangency"]
+# Heavy/extra deps baked into the image (axion-common is always included).
+extra_dependencies = [
+    "numpy>=1.26.0",
+    "pandas>=2.0.0",
+    "scipy>=1.11.0",
+    "statsmodels>=0.14.0",
+    "pykalman>=0.9.7",
+    "riskfolio-lib>=6.0.0",
+    "axion-series @ git+https://github.com/ferfedec/axion-series.git#subdirectory=axion-series-python",
+    "axion-ticker @ git+https://github.com/ferfedec/axion-ticker.git#subdirectory=axion-ticker-python",
+    "axion-run @ git+https://github.com/ferfedec/axion-run.git#subdirectory=axion-run-python"
+]
