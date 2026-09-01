@@ -1,3 +1,17 @@
+## hola-project 0.3.0 (1.12.0) - 2026-09-01
+
+
+[c091617](https://github.com/aaron4a/pruebas-gh/commit/c09161781615f2c9eeba2155fa51fac051de68fa)...[899ad65](https://github.com/aaron4a/pruebas-gh/commit/899ad657a8fe02610363849024a0a48dde91e53c)
+
+### Features
+
+- Add hola feat ([03eec31](https://github.com/aaron4a/pruebas-gh/commit/03eec319a355e7a95a983b87c599f750fa03edc7))
+
+### Miscellaneous Tasks
+
+- Update version ([899ad65](https://github.com/aaron4a/pruebas-gh/commit/899ad657a8fe02610363849024a0a48dde91e53c))
+
+
 ## hola-project 0.2.0 (0.11.0) - 2026-09-01
 
 
