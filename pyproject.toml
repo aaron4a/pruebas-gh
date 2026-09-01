@@ -59,7 +59,7 @@ testpaths = ["tests"]
 [tool.axion-strategy]
 name = "adaptive-sv-tangency"
 service = "adaptiveSvTangency"
-version = "0.1.1"
+version = "0.2.1"
 entrypoint = "adaptive_sv_tangency.strategy:AdaptiveSvTangencyStrategy"
 # Copy the whole package into the image build context.
 source_packages = ["src/adaptive_sv_tangency"]
