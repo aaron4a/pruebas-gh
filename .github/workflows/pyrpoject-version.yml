@@ -40,8 +40,10 @@ jobs:
           filters: |
             chau:
               - 'chau/**'
+              - '!chau/CHANGELOG.md'
             hola:
               - 'hola/**'
+              - '!hola/CHANGELOG.md'
 
   release:
     needs: detect-changes
