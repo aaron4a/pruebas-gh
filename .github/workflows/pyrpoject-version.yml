@@ -11,6 +11,11 @@ jobs:
   release:
     runs-on: ubuntu-latest
     steps:
+
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          
       - name: Get strategy version from pyproject.toml
         id: get_tag
         run: |
