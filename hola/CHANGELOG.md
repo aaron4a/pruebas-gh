@@ -1,3 +1,13 @@
+## hola-project 0.5.0 (1.14.0) - 2026-09-01
+
+
+[c7a8a36](https://github.com/aaron4a/pruebas-gh/commit/c7a8a3638e262eb9b67330ce0f5e59999c5a9178)...[25df925](https://github.com/aaron4a/pruebas-gh/commit/25df9257d1eff28338aeb284bb6cdeec0772248a)
+
+### Features
+
+- Change hola ([25df925](https://github.com/aaron4a/pruebas-gh/commit/25df9257d1eff28338aeb284bb6cdeec0772248a))
+
+
 ## hola-project 0.3.0 (1.12.0) - 2026-09-01
 
 
